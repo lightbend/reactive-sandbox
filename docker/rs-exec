@@ -1,0 +1,31 @@
+#!/bin/sh
+
+set -e
+
+echo "* Initializing Reactive Sandbox"
+
+chown -R reactive-sandbox /data
+
+if [ "$RS_CASSANDRA" = 0 ]; then
+  echo "* Disabling Cassandra"
+  rm -rf /etc/supervisor.d/cassandra.ini
+fi
+
+if [ "$RS_ELASTICSEARCH" = 0 ]; then
+  echo "* Disabling Elasticsearch"
+  rm -rf /etc/supervisor.d/elasticsearch.ini
+fi
+
+if [ "$RS_KAFKA" = 0 ]; then
+  echo "* Disabling Kafka"
+  rm -rf /etc/supervisor.d/kafka.ini
+fi
+
+if [ "$RS_ZOOKEEPER" = 0 ]; then
+  echo "* Disabling ZooKeeper"
+  rm -rf /etc/supervisor.d/zookeeper.ini
+fi
+
+echo "* Starting Reactive Sandbox"
+
+exec supervisord -n -c /etc/supervisord.conf
