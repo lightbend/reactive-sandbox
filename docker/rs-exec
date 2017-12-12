@@ -31,7 +31,6 @@ mkdir -p /data/zookeeper
 echo -e 'tickTime=2000\ndataDir=/data/zookeeper\nclientPort=2181' > /opt/zookeeper/conf/zoo.cfg
 echo -e 'ZK_SERVER_HEAP=512' > /opt/zookeeper/conf/java.env
 
-
 # Configure Cassandra
 mkdir -p /data/cassandra
 sed -i -e "s/num_tokens/\#num_tokens/" /opt/cassandra/conf/cassandra.yaml
@@ -41,8 +40,8 @@ sed -i -e 's/- seeds: "127.0.0.1"/- seeds: "'"$ip"'"/' /opt/cassandra/conf/cassa
 echo -e '\ninitial_token: 0' >> /opt/cassandra/conf/cassandra.yaml
 echo -e '\ndata_file_directories:\n    - /data/cassandra' >> /opt/cassandra/conf/cassandra.yaml
 echo -e '\nJVM_OPTS="$JVM_OPTS -Dcassandra.skip_wait_for_gossip_to_settle=0"' >> /opt/cassandra/conf/cassandra-env.sh
-echo -e '\nMAX_HEAP_SIZE=512m' >> /opt/cassandra/conf/cassandra-env.sh
-echo -e '\nHEAP_NEWSIZE=512m' >> /opt/cassandra/conf/cassandra-env.sh
+echo -e 'MAX_HEAP_SIZE=512m\n'"$(cat /opt/cassandra/conf/cassandra-env.sh)" > /opt/cassandra/conf/cassandra-env.sh
+echo -e 'HEAP_NEWSIZE=512m\n'"$(cat /opt/cassandra/conf/cassandra-env.sh)" > /opt/cassandra/conf/cassandra-env.sh
 
 # Configure elasticsearch
 mkdir -p /data/elasticsearch
