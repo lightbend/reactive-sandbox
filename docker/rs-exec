@@ -2,30 +2,57 @@
 
 set -e
 
-echo "* Initializing Reactive Sandbox"
-
-chown -R reactive-sandbox /data
+# Disable modules
 
 if [ "$RS_CASSANDRA" = 0 ]; then
-  echo "* Disabling Cassandra"
+  echo "reactive-sandbox: disabling cassandra"
   rm -rf /etc/supervisor.d/cassandra.ini
 fi
 
 if [ "$RS_ELASTICSEARCH" = 0 ]; then
-  echo "* Disabling Elasticsearch"
+  echo "reactive-sandbox: disabling elasticsearch"
   rm -rf /etc/supervisor.d/elasticsearch.ini
 fi
 
 if [ "$RS_KAFKA" = 0 ]; then
-  echo "* Disabling Kafka"
+  echo "reactive-sandbox: disabling kafka"
   rm -rf /etc/supervisor.d/kafka.ini
 fi
 
 if [ "$RS_ZOOKEEPER" = 0 ]; then
-  echo "* Disabling ZooKeeper"
+  echo "reactive-sandbox: disabling zookeeper"
   rm -rf /etc/supervisor.d/zookeeper.ini
 fi
 
-echo "* Starting Reactive Sandbox"
+ip="$(grep "$HOSTNAME" /etc/hosts|awk '{print $1}')"
 
+# Configure ZooKeeper
+mkdir -p /data/zookeeper
+echo -e 'tickTime=2000\ndataDir=/data/zookeeper\nclientPort=2181' > /opt/zookeeper/conf/zoo.cfg
+
+# Configure Cassandra
+mkdir -p /data/cassandra
+sed -i -e "s/num_tokens/\#num_tokens/" /opt/cassandra/conf/cassandra.yaml
+sed -i -e "s/^rpc_address.*/rpc_address: $ip/" /opt/cassandra/conf/cassandra.yaml
+sed -i -e "s/^listen_address.*/listen_address: $ip/" /opt/cassandra/conf/cassandra.yaml
+sed -i -e 's/- seeds: "127.0.0.1"/- seeds: "'"$ip"'"/' /opt/cassandra/conf/cassandra.yaml
+echo -e '\ninitial_token: 0' >> /opt/cassandra/conf/cassandra.yaml
+echo -e '\ndata_file_directories:\n    - /data/cassandra' >> /opt/cassandra/conf/cassandra.yaml
+echo -e '\nJVM_OPTS="$JVM_OPTS -Dcassandra.skip_wait_for_gossip_to_settle=0"' >> /opt/cassandra/conf/cassandra-env.sh
+
+# Configure elasticsearch
+mkdir -p /data/elasticsearch
+echo -e "\nnetwork.host: $ip" >> /opt/elasticsearch/config/elasticsearch.yml
+echo -e "\ndiscovery.type: single-node" >> /opt/elasticsearch/config/elasticsearch.yml
+echo -e "\npath.data: /data/elasticsearch" >> /opt/elasticsearch/config/elasticsearch.yml
+
+# Configure Kafka
+mkdir -p /data/kafka
+echo -e "\nlisteners = PLAINTEXT://$ip:9092" >> /opt/kafka/config/server.properties
+echo -e "\nlog.dirs=/data/kafka" >> /opt/kafka/config/server.properties
+
+# Directories & Permissions
+chown -R reactive-sandbox /data
+
+# Start
 exec supervisord -n -c /etc/supervisord.conf
