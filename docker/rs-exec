@@ -54,6 +54,13 @@ echo -e "\n-Xms512m\n-Xmx512m" >> /opt/elasticsearch/config/jvm.options
 mkdir -p /data/kafka
 echo -e "\nlisteners = PLAINTEXT://$ip:9092" >> /opt/kafka/config/server.properties
 echo -e "\nlog.dirs=/data/kafka" >> /opt/kafka/config/server.properties
+cat << EOT > /opt/kafka/bin/kafka
+#!/usr/bin/env bash
+export KAFKA_HEAP_OPTS="-Xmx1G -Xms1G"
+
+exec /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties
+EOT
+chmod +x /opt/kafka/bin/kafka
 
 # Directories & Permissions
 chown -R reactive-sandbox /data
