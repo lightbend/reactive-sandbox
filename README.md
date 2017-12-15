@@ -9,9 +9,49 @@ This project implements a small Docker image containing common dependencies for 
 
 This image is meant to be used during development. It is not production grade.
 
+## Configuration
+
+The following environment variables are available:
+
+**RS_ENABLE_CASSANDRA**
+
+If set to `0`, Cassandra will not be started.
+
+**RS_ENABLE_ELASTICSEARCH**
+
+If set to `0`, Elasticsearch will not be started.
+
+**RS_ENABLE_KAFKA**
+
+If set to `0`, Kafka will not be started.
+
+**RS_ENABLE_ZOOKEEPER**
+
+If set to `0`, ZooKeeper will not be started.
+
+**RS_CASSANDRA_HEAP**
+
+Declares heap size for Cassandra. Defaults to 256.
+
+**RS_ELASTICSEARCH_HEAP**
+
+Declares heap size for Elasticsearch. Defaults to 128.
+
+**RS_KAFKA_HEAP**
+
+Declares heap size for Kafka. Defaults to 256.
+
+**RS_ZOOKEEPER_HEAP**
+
+Declares heap size for ZooKeeper. Defaults to 128.
+
 ## Maintenance
 
 Enterprise Suite Platform Team <es-platform@lightbend.com>
+
+## Releasing
+
+Consult the _Platform Tooling Release Process_ document in Google Drive.
 
 ## License
 

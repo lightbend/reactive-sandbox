@@ -2,61 +2,119 @@
 
 set -e
 
-# Disable modules
-
-if [ "$RS_CASSANDRA" = 0 ]; then
-  echo "reactive-sandbox: disabling cassandra"
-  rm -rf /etc/supervisor.d/cassandra.ini
-fi
-
-if [ "$RS_ELASTICSEARCH" = 0 ]; then
-  echo "reactive-sandbox: disabling elasticsearch"
-  rm -rf /etc/supervisor.d/elasticsearch.ini
-fi
-
-if [ "$RS_KAFKA" = 0 ]; then
-  echo "reactive-sandbox: disabling kafka"
-  rm -rf /etc/supervisor.d/kafka.ini
-fi
-
-if [ "$RS_ZOOKEEPER" = 0 ]; then
-  echo "reactive-sandbox: disabling zookeeper"
-  rm -rf /etc/supervisor.d/zookeeper.ini
-fi
+#
+# Init
+#
 
 ip="$(grep "$HOSTNAME" /etc/hosts|awk '{print $1}')"
 
-# Configure ZooKeeper
-mkdir -p /data/zookeeper
-echo -e 'tickTime=2000\ndataDir=/data/zookeeper\nclientPort=2181' > /opt/zookeeper/conf/zoo.cfg
-echo -e 'ZK_SERVER_HEAP=512' > /opt/zookeeper/conf/java.env
+cassandra_heap="$(expr ${RS_CASSANDRA_HEAP:-256} + 0)"
+elasticsearch_heap="$(expr ${RS_ELASTICSEARCH_HEAP:-256} + 0)"
+kafka_heap="$(expr ${RS_KAFKA_HEAP:-256} + 0)"
+zookeeper_heap="$(expr ${RS_ZOOKEEPER_HEAP:-256} + 0)"
 
+echo "Cassandra:     $([ "$RS_ENABLE_CASSANDRA"     != 0 ] && echo "Enabled (Heap: ${cassandra_heap}m)"     || echo "Disabled")"
+echo "Elasticsearch: $([ "$RS_ENABLE_ELASTICSEARCH" != 0 ] && echo "Enabled (Heap: ${elasticsearch_heap}m)" || echo "Disabled")"
+echo "Kafka:         $([ "$RS_ENABLE_KAFKA"         != 0 ] && echo "Enabled (Heap: ${kafka_heap}m)"         || echo "Disabled")"
+echo "ZooKeeper:     $([ "$RS_ENABLE_ZOOKEEPER"     != 0 ] && echo "Enabled (Heap: ${zookeeper_heap}m)"     || echo "Disabled")"
+
+[ "$RS_ENABLE_CASSANDRA"     = 0 ] && rm -rf /etc/supervisor.d/cassandra.ini     || true
+[ "$RS_ENABLE_ELASTICSEARCH" = 0 ] && rm -rf /etc/supervisor.d/elasticsearch.ini || true
+[ "$RS_ENABLE_KAFKA"         = 0 ] && rm -rf /etc/supervisor.d/kafka.ini         || true
+[ "$RS_ENABLE_ZOOKEEPER"     = 0 ] && rm -rf /etc/supervisor.d/zookeeper.ini     || true
+
+#
+# Configure ZooKeeper
+#
+
+mkdir -p /data/zookeeper
+
+touch  /opt/zookeeper/conf/zoo.cfg
+cat << EOT > /opt/zookeeper/conf/zoo.cfg
+
+tickTime=2000
+dataDir=/data/zookeeper
+clientPort=2181
+EOT
+
+touch /opt/zookeeper/conf/java.env
+cat << EOT > /opt/zookeeper/conf/java.env
+
+ZK_SERVER_HEAP=$zookeeper_heap
+EOT
+
+#
 # Configure Cassandra
+#
+
 mkdir -p /data/cassandra
+
+touch /opt/cassandra/conf/cassandra.yaml
 sed -i -e "s/num_tokens/\#num_tokens/" /opt/cassandra/conf/cassandra.yaml
 sed -i -e "s/^rpc_address.*/rpc_address: $ip/" /opt/cassandra/conf/cassandra.yaml
 sed -i -e "s/^listen_address.*/listen_address: $ip/" /opt/cassandra/conf/cassandra.yaml
 sed -i -e 's/- seeds: "127.0.0.1"/- seeds: "'"$ip"'"/' /opt/cassandra/conf/cassandra.yaml
-echo -e '\ninitial_token: 0' >> /opt/cassandra/conf/cassandra.yaml
-echo -e '\ndata_file_directories:\n    - /data/cassandra' >> /opt/cassandra/conf/cassandra.yaml
-echo -e '\nJVM_OPTS="$JVM_OPTS -Dcassandra.skip_wait_for_gossip_to_settle=0"' >> /opt/cassandra/conf/cassandra-env.sh
-echo -e 'MAX_HEAP_SIZE=512m\n'"$(cat /opt/cassandra/conf/cassandra-env.sh)" > /opt/cassandra/conf/cassandra-env.sh
-echo -e 'HEAP_NEWSIZE=512m\n'"$(cat /opt/cassandra/conf/cassandra-env.sh)" > /opt/cassandra/conf/cassandra-env.sh
 
+cat <<EOT >> /opt/cassandra/conf/cassandra.yaml
+
+initial_token: 0
+rpc_server_type: hsha
+concurrent_reads: 2
+concurrent_writes: 2
+concurrent_compactors: 1
+compaction_throughput_mb_per_sec: 0
+key_cache_size_in_mb: 0
+rpc_min_threads: 1
+rpc_max_threads: 1
+
+data_file_directories:
+    - /data/cassandra
+EOT
+
+touch /opt/cassandra/conf/cassandra-env.sh
+cat <<EOT >> /opt/cassandra/conf/cassandra-env.sh
+
+JVM_OPTS="\$JVM_OPTS -Dcassandra.skip_wait_for_gossip_to_settle=0 -Xmx${cassandra_heap}M -Xms${cassandra_heap}M"
+EOT
+
+#
 # Configure elasticsearch
-mkdir -p /data/elasticsearch
-echo -e "\nnetwork.host: $ip" >> /opt/elasticsearch/config/elasticsearch.yml
-echo -e "\ndiscovery.type: single-node" >> /opt/elasticsearch/config/elasticsearch.yml
-echo -e "\npath.data: /data/elasticsearch" >> /opt/elasticsearch/config/elasticsearch.yml
-echo -e "\n-Xms512m\n-Xmx512m" >> /opt/elasticsearch/config/jvm.options
+#
 
+mkdir -p /data/elasticsearch
+
+touch /opt/elasticsearch/config/elasticsearch.yml
+cat <<EOT >> /opt/elasticsearch/config/elasticsearch.yml
+
+network.host: $ip
+discovery.type: single-node
+path.data: /data/elasticsearch
+EOT
+
+touch /opt/elasticsearch/config/jvm.options
+cat <<EOT >> /opt/elasticsearch/config/jvm.options
+
+-Xms${elasticsearch_heap}m
+-Xmx${elasticsearch_heap}m
+EOT
+
+#
 # Configure Kafka
+#
+
 mkdir -p /data/kafka
-echo -e "\nlisteners = PLAINTEXT://$ip:9092" >> /opt/kafka/config/server.properties
-echo -e "\nlog.dirs=/data/kafka" >> /opt/kafka/config/server.properties
+
+touch /opt/kafka/config/server.properties
+cat << EOT >> /opt/kafka/config/server.properties
+
+listeners = PLAINTEXT://$ip:9092
+log.dirs=/data/kafka
+EOT
+
+touch /opt/kafka/bin/kafka
 cat << EOT > /opt/kafka/bin/kafka
 #!/usr/bin/env bash
-export KAFKA_HEAP_OPTS="-Xmx1G -Xms1G"
+export KAFKA_HEAP_OPTS="-Xmx${kafka_heap}m -Xms${kafka_heap}m"
 
 exec /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties
 EOT
