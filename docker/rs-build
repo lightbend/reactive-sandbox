@@ -12,7 +12,7 @@ apk add --no-cache bash openjdk8-jre-base supervisor
 cassandra_url="https://archive.apache.org/dist/cassandra/3.0.15/apache-cassandra-3.0.15-bin.tar.gz"
 elasticsearch_url="https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.6.5.tar.gz"
 kafka_url="http://mirrors.ibiblio.org/apache/kafka/1.0.0/kafka_2.11-1.0.0.tgz"
-zookeeper_url="http://mirrors.ibiblio.org/apache/zookeeper//zookeeper-3.4.11/zookeeper-3.4.11.tar.gz"
+zookeeper_url="http://mirrors.ibiblio.org/apache/zookeeper/zookeeper-3.4.11/zookeeper-3.4.11.tar.gz"
 
 mkdir -p /root/build
 cd /root/build
