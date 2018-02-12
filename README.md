@@ -9,6 +9,20 @@ This project implements a small Docker image containing common dependencies for 
 
 This image is meant to be used during development. It is not production grade.
 
+## Kubernetes Installation
+
+Reactive Sandbox is installed using [helm](https://helm.sh/). To do this, follow the instructions below:
+
+```bash
+# Install Helm and add the Lightbend repository
+helm init
+helm repo add lightbend-helm-charts https://lightbend.github.io/helm-charts
+helm update
+
+# Install the reactive-sandbox
+helm install lightbend-helm-charts/reactive-sandbox --name reactive-sandbox
+```
+
 ## Configuration
 
 The following environment variables are available:
