@@ -1,6 +1,11 @@
 # reactive-sandbox
 
-This project implements a small Docker image containing common dependencies for running Lightbend Reactive Platform applications. This includes minimal versions of:
+[![GitHub version](https://img.shields.io/badge/version-0.6.0-blue.svg)](https://github.com/lightbend/reactive-cli/releases)
+[![Build Status](https://api.travis-ci.org/lightbend/sbt-reactive-app.png?branch=master)](https://travis-ci.org/lightbend/sbt-reactive-app)
+
+This project is a component of [Lightbend Reactive Platform Tooling](https://developer.lightbend.com/docs/reactive-platform-tooling/latest/). Refer to its documentation for usage, examples, and reference information.
+
+It implements a small Docker image containing common dependencies for running [Lightbend Reactive Platform](https://www.lightbend.com/products/reactive-platform) applications. This includes minimal versions of:
 
 * Cassandra
 * Elasticsearch
