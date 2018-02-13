@@ -27,6 +27,14 @@ helm update
 helm install lightbend-helm-charts/reactive-sandbox --name reactive-sandbox
 ```
 
+## Published Docker Images
+
+Lightbend publishes builds of this image to its [Bintray Registry](https://bintray.com/lightbend/registry/rp%3Areactive-sandbox).
+
+```bash
+docker pull lightbend-docker-registry.bintray.io/rp/reactive-sandbox:<version>
+```
+
 ## Configuration
 
 The following environment variables are available:
