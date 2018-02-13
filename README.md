@@ -1,7 +1,6 @@
 # reactive-sandbox
 
-[![GitHub version](https://img.shields.io/badge/version-0.6.0-blue.svg)](https://github.com/lightbend/reactive-cli/releases)
-[![Build Status](https://api.travis-ci.org/lightbend/sbt-reactive-app.png?branch=master)](https://travis-ci.org/lightbend/sbt-reactive-app)
+[![GitHub version](https://img.shields.io/badge/version-0.2.0-blue.svg)](https://github.com/lightbend/reactive-sandbox/releases)
 
 This project is a component of [Lightbend Reactive Platform Tooling](https://developer.lightbend.com/docs/reactive-platform-tooling/latest/). Refer to its documentation for usage, examples, and reference information.
 
