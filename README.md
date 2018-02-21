@@ -2,7 +2,7 @@
 
 [![GitHub version](https://img.shields.io/badge/version-0.2.0-blue.svg)](https://github.com/lightbend/reactive-sandbox/releases)
 
-This project is a component of [Lightbend Reactive Platform Tooling](https://developer.lightbend.com/docs/reactive-platform-tooling/latest/). Refer to its documentation for usage, examples, and reference information.
+This project is a component of [Lightbend Orchestration for Kubernetes](https://developer.lightbend.com/docs/lightbend-orchestration-kubernetes/latest/). Refer to its documentation for usage, examples, and reference information.
 
 It implements a small Docker image containing common dependencies for running [Lightbend Reactive Platform](https://www.lightbend.com/products/reactive-platform) applications. This includes minimal versions of:
 
