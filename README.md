@@ -11,6 +11,12 @@ It implements a small Docker image containing common dependencies for running [L
 
 This image is meant to be used during development. It is not production grade.
 
+## Project Status
+
+Lightbend Orchestration is no longer actively developed and will reach its [End of Life](https://developer.lightbend.com/docs/lightbend-platform/2.0/support-terminology/index.html#end-of-life-eol-) on April 15, 2020.
+
+We recommend [Migrating to the Improved Kubernetes Deployment Experience](https://developer.lightbend.com/docs/lightbend-orchestration/current/migration.html).
+
 ## Kubernetes Installation
 
 Reactive Sandbox is installed using [helm](https://helm.sh/). To do this, follow the instructions below:
@@ -68,10 +74,6 @@ Declares heap size for Kafka. Defaults to 256.
 **RS_ZOOKEEPER_HEAP**
 
 Declares heap size for ZooKeeper. Defaults to 128.
-
-## Maintenance
-
-Enterprise Suite Platform Team <es-platform@lightbend.com>
 
 ## Releasing
 
